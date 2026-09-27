@@ -75,7 +75,9 @@ public class SessionManager: NSObject, ObservableObject {
     
     @MainActor
     public func logout() {
-        AuthService.shared.logout()
+        Task {
+            await AuthService.shared.logout()
+        }
         self.state = .empty
         UserDefaults.standard.removeObject(forKey: savedKeyStorageKey)
         AppLog.shared.log("[SESSION] Logged out and session cleared")
