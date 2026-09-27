@@ -22,10 +22,10 @@ jobs:
           SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
           echo "[+] SDK Path: $SDK_PATH"
           
-          # Collect all swift files
-          SWIFT_FILES=$(find sources -type f -name "*.swift")
+          # Collect all swift files into a clean response file
+          find sources -type f -name "*.swift" | sort > swift_sources.txt
           echo "[+] Swift files to compile:"
-          echo "$SWIFT_FILES"
+          cat swift_sources.txt
           
           # Compile native arm64 Mach-O executable
           swiftc -target arm64-apple-ios16.0 \
@@ -33,7 +33,7 @@ jobs:
                  -module-name Fatx007 \
                  -emit-executable \
                  -parse-as-library \
-                 $SWIFT_FILES \
+                 @swift_sources.txt \
                  -o Fatx007 \
                  -framework Foundation \
                  -framework SwiftUI \

@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-public class SessionManager: ObservableObject {
+public class SessionManager: NSObject, ObservableObject {
     @Published public var state: AuthState = .empty
     @Published public var revocationMessage: String? = nil
     @Published public var languageSelected: Bool = true
@@ -21,7 +21,8 @@ public class SessionManager: ObservableObject {
     private var timerCancellable: AnyCancellable? = nil
     private let savedKeyStorageKey = "ffxc.saved_key"
     
-    public init() {
+    public override init() {
+        super.init()
         // Load saved key if present
         if let savedKey = UserDefaults.standard.string(forKey: savedKeyStorageKey), !savedKey.isEmpty {
             Task { @MainActor in
