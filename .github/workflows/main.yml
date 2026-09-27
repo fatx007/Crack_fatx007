@@ -30,6 +30,8 @@ jobs:
           # Compile native arm64 Mach-O executable
           swiftc -target arm64-apple-ios16.0 \
                  -sdk "$SDK_PATH" \
+                 -module-name Fatx007 \
+                 -emit-executable \
                  -parse-as-library \
                  $SWIFT_FILES \
                  -o Fatx007 \
@@ -37,7 +39,8 @@ jobs:
                  -framework SwiftUI \
                  -framework UIKit \
                  -framework CryptoKit \
-                 -framework Combine
+                 -framework Combine \
+                 -framework Security
                  
           echo "[+] Binary compilation successful:"
           file Fatx007

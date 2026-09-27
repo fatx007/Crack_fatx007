@@ -8,6 +8,8 @@
 import Foundation
 import CryptoKit
 import UIKit
+import Darwin
+import Security
 
 public actor AuthService {
     public static let shared = AuthService()

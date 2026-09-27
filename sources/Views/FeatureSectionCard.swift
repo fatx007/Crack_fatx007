@@ -10,9 +10,9 @@ import SwiftUI
 public struct FeatureSectionCard: View {
     public let title: String
     public let options: [F1]
-    @Binding public var config: F4?
+    @Binding public var config: F4
     
-    public init(title: String, options: [F1], config: Binding<F4?>) {
+    public init(title: String, options: [F1], config: Binding<F4>) {
         self.title = title
         self.options = options
         self._config = config
@@ -35,87 +35,63 @@ public struct FeatureSectionCard: View {
                     FeatureRow(
                         option: opt,
                         isOn: Binding(
-                            get: { config?.selected.contains(opt.id) ?? false },
+                            get: { config.selected.contains(opt.id) },
                             set: { on in
                                 if on {
-                                    config?.selected.insert(opt.id)
+                                    config.selected.insert(opt.id)
                                 } else {
-                                    config?.selected.remove(opt.id)
+                                    config.selected.remove(opt.id)
                                 }
                             }
                         )
                     )
                     
                     // Show extra controls if enabled
-                    if config?.selected.contains(opt.id) == true {
+                    if config.selected.contains(opt.id) {
                         VStack(spacing: 10) {
                             if opt.colorControl == true {
                                 ESPColorRow(
-                                    color: Binding(
-                                        get: { config?.espColor ?? "Cyan" },
-                                        set: { config?.espColor = $0 }
-                                    ),
-                                    thickness: Binding(
-                                        get: { config?.espThickness ?? 2.0 },
-                                        set: { config?.espThickness = $0 }
-                                    )
+                                    color: $config.espColor,
+                                    thickness: $config.espThickness
                                 )
                             }
                             
                             if opt.radius != nil || opt.aimbotFov == true {
                                 FOVRadiusRow(
                                     title: "FOV Radius",
-                                    radius: Binding(
-                                        get: { config?.radius ?? 120.0 },
-                                        set: { config?.radius = $0 }
-                                    ),
+                                    radius: $config.radius,
                                     policy: opt.radius ?? F2(min: 20, max: 300, step: 5, initial: 120)
                                 )
                             }
                             
                             if opt.h0 != nil {
                                 HeadshotRateRow(
-                                    value: Binding(
-                                        get: { config?.h0 ?? 50.0 },
-                                        set: { config?.h0 = $0 }
-                                    ),
+                                    value: $config.h0,
                                     policy: opt.h0 ?? F2(min: 0, max: 100, step: 5, initial: 50)
                                 )
                             }
                             
                             if opt.a0 == true {
                                 AimTargetRow(
-                                    target: Binding(
-                                        get: { config?.a0 ?? "head" },
-                                        set: { config?.a0 = $0 }
-                                    )
+                                    target: $config.a0
                                 )
                             }
                             
                             if opt.aimFovMode == true {
                                 AimFovModeRow(
-                                    mode: Binding(
-                                        get: { config?.aimFovMode ?? "firing" },
-                                        set: { config?.aimFovMode = $0 }
-                                    )
+                                    mode: $config.aimFovMode
                                 )
                             }
                             
                             if opt.fastReload == true {
                                 FastReloadRow(
-                                    percent: Binding(
-                                        get: { config?.fastReloadPercent ?? 30.0 },
-                                        set: { config?.fastReloadPercent = $0 }
-                                    )
+                                    percent: $config.fastReloadPercent
                                 )
                             }
                             
                             if opt.fastFire == true {
                                 FastFireRow(
-                                    level: Binding(
-                                        get: { config?.fastFireLevel ?? 1 },
-                                        set: { config?.fastFireLevel = $0 }
-                                    )
+                                    level: $config.fastFireLevel
                                 )
                             }
                         }

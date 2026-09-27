@@ -28,8 +28,8 @@ public struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state.isValid)
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active && session.state.isValid {
+        .onChange(of: scenePhase) { _ in
+            if scenePhase == .active && session.state.isValid {
                 Task {
                     _ = await AuthService.shared.revalidate()
                 }

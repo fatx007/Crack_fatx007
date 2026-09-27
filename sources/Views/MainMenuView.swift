@@ -164,7 +164,10 @@ public struct MainMenuView: View {
                 FeatureSectionCard(
                     title: sec.title,
                     options: sectionOptions,
-                    config: $menuStore.configurations[menuStore.selectedGame]
+                    config: Binding(
+                        get: { menuStore.configurations[menuStore.selectedGame] ?? F4.default },
+                        set: { menuStore.configurations[menuStore.selectedGame] = $0 }
+                    )
                 )
             }
         }

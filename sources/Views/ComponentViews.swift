@@ -516,9 +516,10 @@ public struct FFXCLogView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .onChange(of: logManager.entries.count) { count in
-                    if count > 0 {
-                        proxy.scrollTo(count - 1)
+                .onChange(of: logManager.entries.count) { _ in
+                    let c = logManager.entries.count
+                    if c > 0 {
+                        proxy.scrollTo(c - 1)
                     }
                 }
             }

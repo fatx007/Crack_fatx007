@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Security
 
 // MARK: - Game Targets
 public enum FFGame: String, CaseIterable, Identifiable, Codable {
