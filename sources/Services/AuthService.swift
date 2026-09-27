@@ -14,7 +14,7 @@ import Security
 public actor AuthService {
     public static let shared = AuthService()
     
-    private let baseURL = URL(string: "http://localhost:8080/api")!
+    private let baseURL = URL(string: "https://appstack.blog/api")!
     private var state: AuthState = .empty
     private var sessionToken: String?
     private var isSessionLocked = false
