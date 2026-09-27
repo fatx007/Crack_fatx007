@@ -26,11 +26,22 @@ public actor AuthService {
     private init() {}
     
     // MARK: - Hardware Identification & Fingerprint
-    public func getHWID() -> String {
+    @MainActor
+    public static func getHWID() -> String {
         if let id = UIDevice.current.identifierForVendor?.uuidString {
             return id
         }
         return "UNKNOWN_HWID"
+    }
+    
+    @MainActor
+    public static func getDeviceName() -> String {
+        return UIDevice.current.name
+    }
+    
+    @MainActor
+    public static func getSystemVersion() -> String {
+        return UIDevice.current.systemVersion
     }
     
     public func getDeviceModel() -> String {
@@ -55,11 +66,15 @@ public actor AuthService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.timeoutInterval = 15.0
         
+        let hwid = await AuthService.getHWID()
+        let deviceName = await AuthService.getDeviceName()
+        let sysVersion = await AuthService.getSystemVersion()
+        
         let payload: [String: Any] = [
             "key": key.trimmingCharacters(in: .whitespacesAndNewlines),
-            "hwid": getHWID(),
-            "device": UIDevice.current.name,
-            "ios_version": UIDevice.current.systemVersion,
+            "hwid": hwid,
+            "device": deviceName,
+            "ios_version": sysVersion,
             "model": getDeviceModel(),
             "bundle_id": Bundle.main.bundleIdentifier ?? "com.apple.mobile.MobileHouseArrest",
             "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "3.7.33"
@@ -135,14 +150,15 @@ public actor AuthService {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 10.0
         
+        let hwid = await AuthService.getHWID()
         let body: [String: Any] = [
-            "hwid": getHWID(),
+            "hwid": hwid,
             "timestamp": Int64(Date().timeIntervalSince1970)
         ]
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (_, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
                 return .networkError
             }
