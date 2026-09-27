@@ -1,0 +1,73 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Compile Swift Sources to ARM64 iOS Binary
+        run: |
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          echo "[+] SDK Path: $SDK_PATH"
+          
+          # Collect all swift files
+          SWIFT_FILES=$(find sources -type f -name "*.swift")
+          echo "[+] Swift files to compile:"
+          echo "$SWIFT_FILES"
+          
+          # Compile native arm64 Mach-O executable
+          swiftc -target arm64-apple-ios16.0 \
+                 -sdk "$SDK_PATH" \
+                 -parse-as-library \
+                 $SWIFT_FILES \
+                 -o Fatx007 \
+                 -framework Foundation \
+                 -framework SwiftUI \
+                 -framework UIKit \
+                 -framework CryptoKit \
+                 -framework Combine
+                 
+          echo "[+] Binary compilation successful:"
+          file Fatx007
+
+      - name: Package Application Bundle & IPA
+        run: |
+          echo "[+] Creating Payload structure..."
+          mkdir -p Payload/Fatx007.app
+          
+          # Copy executable
+          cp Fatx007 Payload/Fatx007.app/
+          
+          # Copy Info.plist
+          cp Info.plist Payload/Fatx007.app/
+          
+          # Copy resource patch if available
+          if [ -f "Assembly-CSharp-patch.bytes" ]; then
+            cp Assembly-CSharp-patch.bytes Payload/Fatx007.app/
+          fi
+          
+          # Ad-hoc sign for TrollStore / Sideloadly / AltStore / Esign
+          codesign -s - --force --deep --preserve-metadata=entitlements Payload/Fatx007.app || codesign -s - --force --deep Payload/Fatx007.app
+          
+          # Package into IPA
+          zip -qr Fatx007.ipa Payload
+          echo "[+] IPA Package created: $(ls -lh Fatx007.ipa)"
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fatx007-IPA
+          path: Fatx007.ipa
+          retention-days: 14
